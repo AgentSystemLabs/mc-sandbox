@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+packer_cache/
+crash.log
+crash.*.log
+.DS_Store
+packer-manifest.json

@@ -1,0 +1,68 @@
+name: Build & publish golden AMI
+
+# Manual only — each run launches a builder EC2 instance and creates a PUBLIC AMI
+# in the configured AWS account, then uploads the manifest to academy. Never runs
+# on push/schedule so a bake is always intentional.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version (e.g. 2026.06.06-1)"
+        required: true
+        type: string
+      regions:
+        description: "Comma-separated regions to publish to"
+        required: true
+        default: "us-east-1"
+        type: string
+      arch:
+        description: "CPU architecture"
+        required: true
+        default: "x86_64"
+        type: choice
+        options:
+          - x86_64
+          - arm64
+
+# Required repo secrets:
+#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY — creds for the publishing AWS account
+#     (493255580566). Needs ec2 run/stop/terminate, create-image, modify-image-attribute,
+#     describe-*, and an ec2 keypair/security-group for the Packer builder.
+#   ACADEMY_MANIFEST_TOKEN — Bearer token matching academy's GOLDEN_AMI_MANIFEST_PUBLISH_TOKEN.
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-packer@main
+        with:
+          version: latest
+
+      - name: Build AMI and publish manifest
+        env:
+          ACADEMY_MANIFEST_TOKEN: ${{ secrets.ACADEMY_MANIFEST_TOKEN }}
+        run: |
+          node scripts/build-ami.mjs \
+            --version "${{ inputs.version }}" \
+            --regions "${{ inputs.regions }}" \
+            --arch "${{ inputs.arch }}" \
+            --upload-url "https://agentsystem.dev/api/golden-ami/manifest"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: golden-ami-manifest
+          path: dist/golden-ami-manifest.json
+          if-no-files-found: error
