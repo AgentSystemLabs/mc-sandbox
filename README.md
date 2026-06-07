@@ -32,10 +32,14 @@ Control's cloud-init, never baked, which is why the AMI is safe to publish publi
 
 ## Publish via CI (recommended)
 
-Run the **Build & publish golden AMI** workflow (`workflow_dispatch`) with a version,
-regions, and arch. It bakes the AMI, makes it public, and uploads the manifest to
-academy. It is manual-only — never on push/schedule — so a billable bake is always
-intentional.
+Push a **release tag** (`v*`, e.g. `v2026.06.07-1`) — the **Build & publish golden AMI**
+workflow runs only on tags, never on branch pushes or PRs, so a billable bake is always
+a deliberate release. The image version is taken from the tag (`v1.2.3` → `1.2.3`). It
+bakes the AMI for us-east-1/x86_64, makes it public, and uploads the manifest to academy.
+
+```bash
+git tag v2026.06.07-1 && git push origin v2026.06.07-1
+```
 
 Required repo secrets:
 
