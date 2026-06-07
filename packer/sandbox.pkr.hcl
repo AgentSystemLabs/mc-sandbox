@@ -83,6 +83,10 @@ source "amazon-ebs" "sandbox" {
   ami_regions     = var.ami_regions
   # Public: any AWS account can launch it. Safe because no secrets are baked.
   ami_groups = ["all"]
+  # Re-running the same version replaces the existing AMI instead of failing on a
+  # duplicate name (AMI names are unique per region/account).
+  force_deregister      = true
+  force_delete_snapshot = true
   # Drop the temporary Packer SSH key from the captured image.
   ssh_clear_authorized_keys = true
 
