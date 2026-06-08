@@ -15,6 +15,14 @@ if ! command -v node >/dev/null 2>&1 || [ "$(node -p 'process.versions.node.spli
   apt-get install -y nodejs
 fi
 
+# GitHub CLI (gh) from the official apt repo (signed-by keyring, arch-matched).
+install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /etc/apt/keyrings/githubcli-archive-keyring.gpg
+chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
+apt-get update
+apt-get install -y gh
+
 if ! id -u workspace >/dev/null 2>&1; then
   useradd --create-home --shell /bin/bash workspace
 fi

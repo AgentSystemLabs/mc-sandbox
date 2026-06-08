@@ -2,8 +2,8 @@
 
 Builds and publishes the **Mission Control sandbox golden AMI** — a pre-baked
 **public** AMI (owned by the AgentSystemLabs AWS account) with every sandbox tool
-preinstalled: Node 24, pnpm, the Mission Control agent, and the Claude Code / Codex /
-OpenCode / cursor-agent CLIs.
+preinstalled: Node 24, pnpm, the GitHub CLI (`gh`), the Mission Control agent, and the
+Claude Code / Codex / OpenCode / cursor-agent CLIs.
 
 Mission Control launches customer sandboxes from this AMI so an AWS sandbox boots in
 ~30–60s instead of running apt/npm on every boot (~3–6 min). When no AMI exists for a
